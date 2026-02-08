@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Celestial Birthday Oracle</title>
+  <title>星辰生日启示录</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700;900&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
     }
     .celestial-bg {
       background: radial-gradient(circle at center, #0a0a25 0%, #050515 50%, #010108 100%);
+      background-attachment: fixed;
     }
     .animate-float { animation: float 5s ease-in-out infinite; }
     
@@ -40,6 +41,13 @@
       -webkit-background-clip: text;
       color: transparent;
     }
+
+    /* 修复白屏闪烁 */
+    body {
+      margin: 0;
+      background-color: #010108;
+      color: white;
+    }
   </style>
 <script type="importmap">
 {
@@ -53,7 +61,7 @@
 }
 </script>
 </head>
-<body class="bg-black text-white selection:bg-yellow-500/20 m-0 p-0 overflow-x-hidden">
+<body class="selection:bg-yellow-500/20">
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
 </body>
