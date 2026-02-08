@@ -5,7 +5,6 @@ import {
   Sun, Moon, Compass, Crown, Star, Gift, ChevronRight
 } from 'lucide-react';
 
-// 在 App 内直接定义类型，避免外部文件引用失败导致的黑屏
 interface BlessingData {
   title: string;
   text: string;
@@ -73,7 +72,6 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // 预留加载时间，确保资源就位
     const timer = setTimeout(() => {
       setAppState(AppState.REVEALING);
       setIsVisible(true);
