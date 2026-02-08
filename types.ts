@@ -1,13 +1,12 @@
 
 export interface BlessingData {
+  title: string;
   text: string;
-  audioBase64?: string;
-  imageUrl?: string;
+  imageUrl: string;
+  color: string;
 }
 
 export enum AppState {
-  IDLE,
   LOADING,
-  REVEALING,
-  ERROR
+  REVEALING
 }

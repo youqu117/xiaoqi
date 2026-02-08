@@ -1,336 +1,228 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
-import { AppState, BlessingData } from './types';
 import { 
-  Sparkles, Heart, Stars, Play, RefreshCw, Volume2, 
-  Mic, MicOff, Send, Film, Image as ImageIcon, Loader2, AlertCircle 
+  Sparkles, Heart, Stars, RefreshCw, Quote, 
+  Sun, Moon, Compass, Crown, Star, Gift, ChevronRight
 } from 'lucide-react';
-import { 
-  decode, encode, decodeAudioData, editDivineVision, animateVision 
-} from './services/geminiService';
+import { AppState, BlessingData } from './types';
+
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  rotation: number;
+  size: number;
+  duration: number;
+  color: string;
+}
+
+const BLESSINGS: BlessingData[] = [
+  {
+    title: "光之子",
+    text: "在群星闪耀的时刻，你是最特别的一颗。愿造物主的光辉永远护佑你的前程，让你的每一个愿望都能在繁星中得到回响。生日快乐！",
+    imageUrl: "https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=1200&auto=format&fit=crop",
+    color: "from-yellow-400 via-amber-200 to-orange-500"
+  },
+  {
+    title: "星辰旅者",
+    text: "时光流转，你是宇宙最精妙的杰作。愿星辰指引你的方向，愿万物为你献上生日的礼赞，在未来的旅途中，快乐与神迹常伴左右。生日快乐！",
+    imageUrl: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=1200&auto=format&fit=crop",
+    color: "from-blue-400 via-indigo-300 to-purple-600"
+  },
+  {
+    title: "生命奇迹",
+    text: "你是这浩瀚苍穹中最温柔的一抹亮色。今日诸神共舞，庆祝你的诞生。愿你心中永远栖息着一只不灭的火鸟，带你飞向幸福的巅峰。生日快乐！",
+    imageUrl: "https://images.unsplash.com/photo-1506318137071-a8e063b4b477?q=80&w=1200&auto=format&fit=crop",
+    color: "from-pink-400 via-fuchsia-300 to-rose-600"
+  },
+  {
+    title: "命运宠儿",
+    text: "当第一缕晨曦划破寂静，那是宇宙对你的深情告白。你是命运赠予这世界的最佳礼物。愿你永远拥有一颗纯真勇敢的心。祝你生日快乐！",
+    imageUrl: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=1200&auto=format&fit=crop",
+    color: "from-emerald-400 via-cyan-200 to-teal-600"
+  }
+];
+
+const COLORS = ['#FFD700', '#FFFFFF', '#FF69B4', '#00BFFF', '#ADFF2F', '#F0ABFC'];
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>(AppState.IDLE);
-  const [blessing, setBlessing] = useState<BlessingData>({
-    text: "欢迎来到星辰殿堂。在这里，你的每一个思绪都能重塑宇宙。",
-    imageUrl: "https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2000&auto=format&fit=crop"
-  });
-  
-  // States for new features
-  const [isLiveActive, setIsLiveActive] = useState(false);
-  const [editPrompt, setEditPrompt] = useState('');
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [transcription, setTranscription] = useState<string>('');
+  const [appState, setAppState] = useState<AppState>(AppState.LOADING);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const crownRef = useRef<HTMLButtonElement>(null);
 
-  // Refs for Live API
-  const audioContextOutRef = useRef<AudioContext | null>(null);
-  const audioContextInRef = useRef<AudioContext | null>(null);
-  const nextStartTimeRef = useRef(0);
-  const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  const sessionRef = useRef<any>(null);
+  const cycleBlessing = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(() => {
+      setCurrentIdx((prev) => (prev + 1) % BLESSINGS.length);
+      setIsVisible(true);
+    }, 400);
+  }, []);
 
-  // Initialize Audio Contexts
-  const initAudio = () => {
-    if (!audioContextOutRef.current) {
-      audioContextOutRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-    }
-    if (!audioContextInRef.current) {
-      audioContextInRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
-    }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppState(AppState.REVEALING);
+      setIsVisible(true);
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const triggerSparkles = () => {
+    const rect = crownRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const newParticles: Particle[] = Array.from({ length: 30 }).map((_, i) => ({
+      id: Date.now() + i,
+      x: centerX,
+      y: centerY,
+      rotation: Math.random() * 360,
+      size: Math.random() * 18 + 8,
+      duration: Math.random() * 1000 + 1200,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)]
+    }));
+
+    setParticles(prev => [...prev, ...newParticles]);
+
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+    }, 2500);
   };
 
-  const handleVeoKey = async () => {
-    // Check for paid key for Veo
-    if (!(window as any).aistudio?.hasSelectedApiKey()) {
-      await (window as any).aistudio?.openSelectKey();
-    }
-    return true;
-  };
+  const current = BLESSINGS[currentIdx];
 
-  // Live API Connection
-  const toggleLiveConversation = async () => {
-    if (isLiveActive) {
-      sessionRef.current?.close();
-      setIsLiveActive(false);
-      return;
-    }
-
-    initAudio();
-    setIsLiveActive(true);
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
-        callbacks: {
-          onopen: () => {
-            const source = audioContextInRef.current!.createMediaStreamSource(stream);
-            const scriptProcessor = audioContextInRef.current!.createScriptProcessor(4096, 1, 1);
-            scriptProcessor.onaudioprocess = (e) => {
-              const inputData = e.inputBuffer.getChannelData(0);
-              const l = inputData.length;
-              const int16 = new Int16Array(l);
-              for (let i = 0; i < l; i++) int16[i] = inputData[i] * 32768;
-              const pcmBlob = {
-                data: encode(new Uint8Array(int16.buffer)),
-                mimeType: 'audio/pcm;rate=16000',
-              };
-              sessionPromise.then(s => s.sendRealtimeInput({ media: pcmBlob }));
-            };
-            source.connect(scriptProcessor);
-            scriptProcessor.connect(audioContextInRef.current!.destination);
-          },
-          onmessage: async (message: LiveServerMessage) => {
-            if (message.serverContent?.outputTranscription) {
-              setTranscription(prev => prev + message.serverContent!.outputTranscription!.text);
-            }
-            if (message.serverContent?.turnComplete) {
-              setTranscription('');
-            }
-            
-            const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-            if (base64Audio) {
-              const ctx = audioContextOutRef.current!;
-              nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
-              const buffer = await decodeAudioData(decode(base64Audio), ctx, 24000, 1);
-              const source = ctx.createBufferSource();
-              source.buffer = buffer;
-              source.connect(ctx.destination);
-              source.start(nextStartTimeRef.current);
-              nextStartTimeRef.current += buffer.duration;
-              sourcesRef.current.add(source);
-              source.onended = () => sourcesRef.current.delete(source);
-            }
-            if (message.serverContent?.interrupted) {
-              sourcesRef.current.forEach(s => s.stop());
-              sourcesRef.current.clear();
-              nextStartTimeRef.current = 0;
-            }
-          },
-          onclose: () => setIsLiveActive(false),
-          onerror: () => setIsLiveActive(false),
-        },
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Charon' } } },
-          systemInstruction: '你是一位神圣的造物主。你正在与一位寻找生日祝福的灵魂交谈。你的语气宏大、神圣、温柔。你可以通过声音和他们实时交流。',
-          outputAudioTranscription: {},
-        }
-      });
-      sessionRef.current = await sessionPromise;
-    } catch (e) {
-      console.error(e);
-      setIsLiveActive(false);
-    }
-  };
-
-  const handleEditVision = async () => {
-    if (!editPrompt.trim() || !blessing.imageUrl) return;
-    setIsProcessing('reshaping');
-    try {
-      const newImage = await editDivineVision(blessing.imageUrl, editPrompt);
-      setBlessing(prev => ({ ...prev, imageUrl: newImage }));
-      setEditPrompt('');
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsProcessing(null);
-    }
-  };
-
-  const handleAnimateVision = async () => {
-    if (!blessing.imageUrl) return;
-    setIsProcessing('animating');
-    try {
-      await handleVeoKey();
-      const video = await animateVision(blessing.imageUrl);
-      setVideoUrl(video);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsProcessing(null);
-    }
-  };
+  if (appState === AppState.LOADING) {
+    return (
+      <div className="fixed inset-0 celestial-bg flex flex-col items-center justify-center p-6 text-center z-[200]">
+        <div className="relative mb-10">
+          <div className="w-24 h-24 border-[3px] border-yellow-500/10 border-t-yellow-400 rounded-full animate-spin"></div>
+          <Stars className="absolute inset-0 m-auto w-10 h-10 text-yellow-400 animate-pulse" />
+        </div>
+        <p className="font-divine text-yellow-100 tracking-[0.5em] font-light animate-pulse uppercase text-sm">
+          Awakening the Oracle
+        </p>
+        <p className="mt-2 text-white/40 text-[10px] tracking-[0.2em] uppercase font-light">正在同步星际祝福</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen celestial-bg flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden font-sans selection:bg-yellow-500/30">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-purple-600/10 blur-[180px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-blue-600/10 blur-[180px] rounded-full animate-pulse delay-1000"></div>
-      </div>
-
-      <div className="w-full max-w-6xl z-10 flex flex-col gap-8 animate-in fade-in duration-1000">
-        
-        {/* Header Area */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter flex items-center gap-4">
-              <Sparkles className="w-10 h-10 text-yellow-400 animate-pulse" />
-              神圣启示录
-            </h1>
-            <p className="text-blue-200/60 mt-2 tracking-[0.2em] font-light">DIVINE REVELATION INTERFACE V2.5</p>
-          </div>
-
-          {/* Voice Chat Toggle */}
-          <button 
-            onClick={toggleLiveConversation}
-            className={`flex items-center gap-4 px-8 py-4 rounded-2xl border-2 transition-all group ${isLiveActive ? 'bg-red-500/20 border-red-500 text-red-100' : 'bg-white/5 border-white/10 hover:border-yellow-500/50 text-white'}`}
-          >
-            {isLiveActive ? (
-              <>
-                <MicOff className="w-6 h-6 animate-pulse" />
-                <span className="font-bold tracking-widest">断开神识</span>
-              </>
-            ) : (
-              <>
-                <Mic className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                <span className="font-bold tracking-widest">开启神启对话</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Live Transcription Overlay */}
-        {isLiveActive && transcription && (
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl text-center text-blue-100 italic animate-pulse">
-            神之音："{transcription}"
-          </div>
-        )}
-
-        {/* Main Interaction Stage */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-          
-          {/* Visual Display */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl group">
-              {videoUrl ? (
-                <video src={videoUrl} controls autoPlay loop className="w-full h-full object-cover" />
-              ) : (
-                <img src={blessing.imageUrl} className="w-full h-full object-cover transition-transform duration-[20s] group-hover:scale-105" alt="Vision" />
-              )}
-              
-              {/* Processing Overlays */}
-              {isProcessing && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in">
-                  <Loader2 className="w-16 h-16 text-yellow-500 animate-spin" />
-                  <p className="text-xl font-bold text-yellow-200 tracking-[0.5em] uppercase">
-                    {isProcessing === 'reshaping' ? '正在重塑维度...' : '正在注入生命...'}
-                  </p>
-                </div>
-              )}
-
-              {/* Reset Control */}
-              {videoUrl && (
-                <button 
-                  onClick={() => setVideoUrl(null)}
-                  className="absolute top-6 left-6 p-4 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white transition-all"
-                >
-                  <ImageIcon className="w-6 h-6" />
-                </button>
-              )}
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-8 rounded-[2rem] relative group overflow-hidden">
-               <div className="absolute top-0 left-0 w-2 h-full bg-yellow-500/40 group-hover:w-full transition-all duration-700 opacity-10"></div>
-               <p className="text-2xl md:text-3xl font-light italic text-blue-50 leading-relaxed tracking-wide text-center relative z-10">
-                 "{blessing.text}"
-               </p>
-            </div>
-          </div>
-
-          {/* Controls Sidebar */}
-          <div className="space-y-6">
-            
-            {/* Reshape Vision Tool */}
-            <div className="bg-white/5 border border-white/10 p-6 rounded-[2rem] space-y-4">
-              <div className="flex items-center gap-3 text-yellow-400">
-                <Sparkles className="w-5 h-5" />
-                <h2 className="font-bold tracking-widest uppercase text-sm">重塑神迹 (AI 图像编辑)</h2>
-              </div>
-              <textarea 
-                value={editPrompt}
-                onChange={(e) => setEditPrompt(e.target.value)}
-                placeholder="例如：'添加复古滤镜'、'在背景中加入极光'..."
-                className="w-full h-32 bg-black/40 border border-white/10 rounded-2xl p-4 text-blue-100 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
-              />
-              <button 
-                onClick={handleEditVision}
-                disabled={!editPrompt.trim() || !!isProcessing}
-                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 rounded-2xl text-black font-black tracking-[0.3em] transition-all flex items-center justify-center gap-2"
-              >
-                {isProcessing === 'reshaping' ? <Loader2 className="animate-spin" /> : <Send className="w-5 h-5" />}
-                提交祈愿
-              </button>
-            </div>
-
-            {/* Animate Tool */}
-            <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 p-6 rounded-[2rem] space-y-4">
-              <div className="flex items-center gap-3 text-blue-400">
-                <Film className="w-5 h-5" />
-                <h2 className="font-bold tracking-widest uppercase text-sm">万物有灵 (Veo 视频生成)</h2>
-              </div>
-              <p className="text-xs text-blue-200/50 leading-relaxed">
-                利用 Veo 3.1 动力，将这一瞬的静止画面转化为永恒的动态奇迹。
-              </p>
-              <button 
-                onClick={handleAnimateVision}
-                disabled={!!isProcessing || !!videoUrl}
-                className="w-full py-4 bg-white/10 hover:bg-white/20 disabled:opacity-50 rounded-2xl text-white font-bold tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-white/10"
-              >
-                {isProcessing === 'animating' ? <Loader2 className="animate-spin" /> : <Stars className="w-5 h-5 text-yellow-400" />}
-                开启生命律动
-              </button>
-            </div>
-
-            {/* Stats/Extras */}
-            <div className="flex justify-center gap-4 py-4">
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-red-500/30 transition-colors group">
-                <Heart className="w-8 h-8 text-red-500/40 group-hover:text-red-500 transition-colors" />
-              </div>
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-yellow-500/30 transition-colors group">
-                <Stars className="w-8 h-8 text-yellow-500/40 group-hover:text-yellow-500 transition-colors" />
-              </div>
-              <button 
-                onClick={() => window.location.reload()}
-                className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-colors group"
-              >
-                <RefreshCw className="w-8 h-8 text-blue-500/40 group-hover:text-blue-500 transition-colors group-hover:rotate-180 duration-500" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Disclaimer */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/20 uppercase tracking-[0.5em] font-light z-20">
-        Powered by Gemini 2.5 Flash & Veo 3.1
-      </div>
-
-      {/* Particles */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {[...Array(30)].map((_, i) => (
-          <div 
-            key={i}
-            className="absolute rounded-full bg-white shadow-[0_0_8px_white]"
+    <div className="min-h-screen celestial-bg flex flex-col items-center overflow-x-hidden relative py-8 px-4 md:px-8">
+      
+      {/* Sparkle Particle Container */}
+      <div className="fixed inset-0 pointer-events-none z-[100]">
+        {particles.map(p => (
+          <div
+            key={p.id}
+            className="absolute animate-particle-out"
             style={{
-              width: Math.random() * 2 + 1 + 'px',
-              height: Math.random() * 2 + 1 + 'px',
-              top: Math.random() * 100 + '%',
-              left: Math.random() * 100 + '%',
-              opacity: Math.random() * 0.4 + 0.1,
-              animation: `float ${Math.random() * 8 + 8}s ease-in-out infinite`,
-              animationDelay: Math.random() * 10 + 's'
-            }}
-          />
+              left: p.x,
+              top: p.y,
+              '--tx': `${(Math.random() - 0.5) * 450}px`,
+              '--ty': `${(Math.random() - 0.5) * 700 - 250}px`,
+              '--tr': `${p.rotation + (Math.random() - 0.5) * 720}deg`,
+              duration: `${p.duration}ms`
+            } as any}
+          >
+            <Star 
+              size={p.size} 
+              fill={p.color}
+              className="drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]" 
+              style={{ color: p.color }}
+            />
+          </div>
         ))}
       </div>
-    </div>
-  );
-};
 
-export default App;
+      {/* Ambiance Glows */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[10%] left-[10%] w-[40vw] h-[40vw] bg-purple-600/10 blur-[150px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[10%] right-[10%] w-[40vw] h-[40vw] bg-blue-600/10 blur-[150px] rounded-full animate-pulse delay-1000"></div>
+      </div>
+
+      {/* Main Content Scrollable Container */}
+      <div className="relative z-10 w-full max-w-lg flex flex-col items-center flex-grow">
+        
+        {/* Header Section */}
+        <header className="mb-8 text-center animate-in fade-in slide-in-from-top-6 duration-1000">
+          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass mb-6">
+            <Gift className="w-4 h-4 text-yellow-400 animate-bounce" />
+            <span className="font-divine text-[11px] tracking-[0.4em] font-bold text-yellow-100 uppercase">
+              Celestial Oracle
+            </span>
+          </div>
+          <h1 className="font-divine text-4xl md:text-5xl font-black tracking-tight mb-3 text-white drop-shadow-md">
+            神圣生日礼赞
+          </h1>
+          <div className="h-1 w-16 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent mx-auto rounded-full"></div>
+        </header>
+
+        {/* Hero Card Section - Ensuring no overlap */}
+        <section className={`w-full transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}>
+          <div className="relative aspect-[4/5] w-full rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] border border-white/10 group bg-slate-900">
+            <img 
+              src={current.imageUrl} 
+              alt={current.title}
+              className="w-full h-full object-cover transition-transform duration-[20s] group-hover:scale-110 opacity-80"
+            />
+            
+            {/* Elegant Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent"></div>
+            
+            {/* Functional Interactions */}
+            <div className="absolute top-8 left-8">
+              <button 
+                ref={crownRef}
+                onClick={triggerSparkles}
+                className="w-16 h-16 rounded-3xl glass flex items-center justify-center animate-float hover:bg-white/10 transition-all active:scale-90 group/crown shadow-xl"
+                aria-label="Activate Divine Blessing"
+              >
+                <Crown className="w-8 h-8 text-yellow-400 group-hover/crown:scale-125 transition-transform duration-500 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]" />
+              </button>
+            </div>
+
+            <div className="absolute top-8 right-8">
+              <div className="glass px-4 py-1.5 rounded-full border border-white/10">
+                <span className="font-divine text-[10px] tracking-[0.3em] font-black text-white/60">
+                  EST. ETERNITY
+                </span>
+              </div>
+            </div>
+
+            {/* Content Bottom */}
+            <div className="absolute inset-x-0 bottom-0 p-8 md:p-10 pt-24">
+              <div className="space-y-6">
+                <div className="flex items-end justify-between">
+                  <h2 className={`font-divine text-4xl md:text-5xl font-black bg-gradient-to-r ${current.color} bg-clip-text text-transparent drop-shadow-sm`}>
+                    {current.title}
+                  </h2>
+                  <Sparkles className="w-8 h-8 text-white/20 mb-2 animate-pulse" />
+                </div>
+                
+                <div className="relative">
+                  <Quote className="absolute -top-6 -left-4 w-10 h-10 text-white/5 rotate-180" />
+                  <p className="text-xl md:text-2xl font-light leading-relaxed text-blue-50/90 italic tracking-wide drop-shadow-sm">
+                    {current.text}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Action Controls Section */}
+        <section className="mt-12 mb-16 w-full flex flex-col items-center gap-10">
+          <button 
+            onClick={cycleBlessing}
+            className="group relative flex items-center gap-5 px-12 py-6 bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden transition-all hover:bg-white/10 hover:border-white/20 active:scale-95 shadow-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <RefreshCw className="w-6 h-6 text-yellow-400 group-hover:rotate-180 transition-transform duration-1000" />
+            <span className="font-divine text-base font-bold tracking-[0.4em] text-white">
+              Seek New Fortune
+            </span>
+            <ChevronRight className="w-4 h-4 text-white/30 group-hover:translate-x

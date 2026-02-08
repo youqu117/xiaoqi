@@ -5,21 +5,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Divine Birthday Blessing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    :root {
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    .font-divine { font-family: 'Cinzel', serif; }
+    
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
+      50% { transform: translateY(-15px); }
     }
     @keyframes glow {
-      0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5)); }
-      50% { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8)); }
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
+      50% { filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.6)); }
     }
     .celestial-bg {
-      background: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: radial-gradient(circle at center, #0a0a1a 0%, #0f172a 50%, #020617 100%);
     }
-    .animate-float { animation: float 6s ease-in-out infinite; }
-    .animate-glow { animation: glow 4s ease-in-out infinite; }
+    .animate-float { animation: float 5s ease-in-out infinite; }
+    .animate-glow { animation: glow 3s ease-in-out infinite; }
+    
+    /* Custom Scrollbar for a cleaner look */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    
+    /* Glassmorphism utility */
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
   </style>
 <script type="importmap">
 {
@@ -33,7 +53,7 @@
 }
 </script>
 </head>
-<body class="bg-black text-white overflow-hidden">
+<body class="bg-black text-white selection:bg-yellow-500/20">
   <div id="root"></div>
 </body>
 </html>
