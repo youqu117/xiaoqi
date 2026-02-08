@@ -4,7 +4,19 @@ import {
   Sparkles, Heart, Stars, RefreshCw, Quote, 
   Sun, Moon, Compass, Crown, Star, Gift, ChevronRight
 } from 'lucide-react';
-import { AppState, BlessingData } from './types';
+
+// Consolidating types to avoid resolution issues in pure ESM environments
+export interface BlessingData {
+  title: string;
+  text: string;
+  imageUrl: string;
+  color: string;
+}
+
+export enum AppState {
+  LOADING,
+  REVEALING
+}
 
 interface Particle {
   id: number;
@@ -54,7 +66,6 @@ const App: React.FC = () => {
 
   const cycleBlessing = useCallback(() => {
     setIsVisible(false);
-    // Smooth transition between cards
     setTimeout(() => {
       setCurrentIdx((prev) => (prev + 1) % BLESSINGS.length);
       setIsVisible(true);
@@ -65,7 +76,7 @@ const App: React.FC = () => {
     const timer = setTimeout(() => {
       setAppState(AppState.REVEALING);
       setIsVisible(true);
-    }, 1800);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -88,7 +99,6 @@ const App: React.FC = () => {
 
     setParticles(prev => [...prev, ...newParticles]);
 
-    // Batch cleanup
     setTimeout(() => {
       setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
     }, 2500);
@@ -114,7 +124,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen celestial-bg flex flex-col items-center overflow-x-hidden relative py-8 px-4 md:px-8">
       
-      {/* Sparkle Particle Container - Hardware Accelerated */}
+      {/* Hardware Accelerated Particle Layer */}
       <div className="fixed inset-0 pointer-events-none z-[100] will-change-transform">
         {particles.map(p => (
           <div
@@ -193,7 +203,7 @@ const App: React.FC = () => {
               </span>
             </div>
 
-            {/* Content Area - Optimized Typography */}
+            {/* Blessing Text */}
             <div className="absolute inset-x-0 bottom-0 p-8 md:p-12 pb-12">
               <div className="space-y-6">
                 <div className="flex items-center gap-5">
@@ -215,7 +225,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Action Controls Section */}
+        {/* Action Controls */}
         <section className="mt-12 mb-16 w-full flex flex-col items-center gap-12">
           <button 
             onClick={cycleBlessing}
@@ -229,7 +239,7 @@ const App: React.FC = () => {
             <ChevronRight className="w-5 h-5 text-white/30 group-hover:translate-x-2 transition-transform" />
           </button>
 
-          {/* Decorative Icons */}
+          {/* Decorative Deck */}
           <div className="flex gap-14">
             {[Heart, Compass, Sun, Moon].map((Icon, idx) => (
               <div key={idx} className="group relative p-3 cursor-pointer transition-all hover:-translate-y-3 text-white/10 hover:text-yellow-400">
@@ -250,7 +260,7 @@ const App: React.FC = () => {
 
       </div>
 
-      {/* Floating Star Background */}
+      {/* Floating Stars */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {[...Array(35)].map((_, i) => (
           <div 
