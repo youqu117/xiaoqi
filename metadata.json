@@ -1,0 +1,7 @@
+{
+  "name": "Divine Oracle & Blessing",
+  "description": "An interactive celestial experience powered by Gemini 2.5. Talk to the Divine Architect, reshape visions, and animate the cosmos.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
