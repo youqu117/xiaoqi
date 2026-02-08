@@ -5,6 +5,7 @@ import {
   Sun, Moon, Compass, Crown, Star, Gift, ChevronRight
 } from 'lucide-react';
 
+// Use simple interfaces and types instead of Enums for better stability
 interface BlessingData {
   title: string;
   text: string;
@@ -12,10 +13,8 @@ interface BlessingData {
   color: string;
 }
 
-enum AppState {
-  LOADING,
-  REVEALING
-}
+// Replaced enum with string union type
+type AppState = 'LOADING' | 'REVEALING';
 
 interface Particle {
   id: number;
@@ -57,7 +56,8 @@ const BLESSINGS: BlessingData[] = [
 const COLORS = ['#FFD700', '#FFFFFF', '#FF69B4', '#00BFFF', '#ADFF2F', '#F0ABFC'];
 
 const App: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>(AppState.LOADING);
+  // Initialize with string 'LOADING'
+  const [appState, setAppState] = useState<AppState>('LOADING');
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -72,10 +72,11 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Reduced loading time slightly for better UX
     const timer = setTimeout(() => {
-      setAppState(AppState.REVEALING);
+      setAppState('REVEALING');
       setIsVisible(true);
-    }, 1500);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -86,7 +87,7 @@ const App: React.FC = () => {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const newParticles: Particle[] = Array.from({ length: 24 }).map(() => ({
+    const newParticles: Particle[] = Array.from({ length: 24 }).map((_, i) => ({
       id: Math.random(),
       x: centerX,
       y: centerY,
@@ -104,7 +105,7 @@ const App: React.FC = () => {
 
   const current = BLESSINGS[currentIdx];
 
-  if (appState === AppState.LOADING) {
+  if (appState === 'LOADING') {
     return (
       <div className="fixed inset-0 celestial-bg flex flex-col items-center justify-center p-6 text-center z-[200]">
         <div className="relative mb-10">
