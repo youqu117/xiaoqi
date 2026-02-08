@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 // Consolidating types to avoid resolution issues in pure ESM environments
+// Do NOT import these from ./types as it causes duplicate identifier errors
 export interface BlessingData {
   title: string;
   text: string;
