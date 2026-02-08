@@ -4,16 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Divine Birthday Blessing</title>
+  <title>Celestial Birthday Oracle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700;900&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Montserrat', sans-serif;
     }
     .font-divine { font-family: 'Cinzel', serif; }
+    .font-ornate { font-family: 'Cinzel Decorative', cursive; }
     
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
@@ -29,16 +30,20 @@
     .animate-float { animation: float 5s ease-in-out infinite; }
     .animate-glow { animation: glow 3s ease-in-out infinite; }
     
-    /* Custom Scrollbar for a cleaner look */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
     
-    /* Glassmorphism utility */
     .glass {
       background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .text-gradient {
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
     }
   </style>
 <script type="importmap">
